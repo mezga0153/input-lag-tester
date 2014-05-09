@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Input lag tester</title>
+  </head>
+  <body>
+    <div id="counters">
+      <div id="framenum"></div>
+    </div>
+    <script type="text/javascript">
+      window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       || 
+                window.webkitRequestAnimationFrame || 
+                window.mozRequestAnimationFrame    || 
+                window.oRequestAnimationFrame      || 
+                window.msRequestAnimationFrame     || 
+                function( callback ){
+                  window.setTimeout(callback, 1000 / 60);
+                };
+      })();
+
+      var frame = 0;
+      var counters = 16;
+      var delays = [];
+
+      for (var i= 0;i < counters;i++) {
+        document.getElementById("counters").innerHTML += "<div id='c_"+i+"'></div>";
+        delays[i] = 0;
+      }
+
+      run = function(){
+        for (var i=counters-1;i > 0;i--) {
+          delays[i] = delays[i-1];
+        }
+        delays[0] = timerDiff(frameTime);
+
+        for (var i=0;i < counters;i++) {
+          var delay = 0;
+          for (var j=i; j >= 0;j--) {
+            delay += delays[j];
+          }
+          document.getElementById("c_" + i).innerHTML = (frame - i) + ":" + delay;
+        }    
+
+        frame = frame + 1;
+        document.getElementById("framenum").innerHTML = frame;
+
+        frameTime = timerInit();
+
+        requestAnimFrame(run);
+      }
+
+      timerInit = function() {
+          return new Date();
+      }
+
+      timerDiff = function(datePrev) {
+          return new Date().getTime() - datePrev.getTime();
+      }
+
+      var frameTime = timerInit();
+
+      run();
+
+      </script>
+  </body>
+</html>
+
+
